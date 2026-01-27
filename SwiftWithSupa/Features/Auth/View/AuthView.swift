@@ -64,7 +64,13 @@ struct AuthView: View {
                                 var avatarUrl: String? = nil
                                 if let img = selectedImage {
                                     let fileName = UUID().uuidString
-                                    avatarUrl = try? await viewModel.uploadAvatar(image: img, fileName: fileName)
+                                    do {
+                                        avatarUrl = try await viewModel.uploadAvatar(image: img, fileName: fileName)
+                                    } catch {
+                                        let nsError = error as NSError
+                                        viewModel.errorMessage = "\(nsError.domain) (\(nsError.code))"
+                                        return
+                                    }
                                 }
                                 await viewModel.signUp(fullName: fullName, email: email, password: password, avatarPath: avatarUrl)
                             }

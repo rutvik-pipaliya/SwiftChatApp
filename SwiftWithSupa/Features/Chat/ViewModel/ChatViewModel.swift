@@ -169,7 +169,8 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                 messages.append(message)
             }
         } catch {
-            errorMessage = error.localizedDescription
+            print("Upload error:", error)
+            self.errorMessage = error.localizedDescription
         }
     }
     
@@ -179,7 +180,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                let path = storagePath(from: message.content) {
                 do {
                     _ = try await client.storage
-                        .from("avatars")
+                        .from("chat-images")
                         .remove(paths: [path])
                 } catch {
                     print("Failed to delete image from storage:", error)
@@ -283,7 +284,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         self.channel = channel
     }
     
-    private func storagePath(from publicURLString: String, bucket: String = "avatars") -> String? {
+    private func storagePath(from publicURLString: String, bucket: String = "chat-images") -> String? {
         guard let url = URL(string: publicURLString) else {
             return nil
         }
@@ -305,13 +306,16 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         }
         
         let fileName = UUID().uuidString + ".jpg"
+        // Store chat images in the dedicated chat-images bucket
+        let path = fileName
         
         try await client.storage
             .from("chat-images")
             .upload(
-                fileName,
-                data: data,
+                path: path,
+                file: data,
                 options: FileOptions(
+                    cacheControl: "3600",
                     contentType: "image/jpeg",
                     upsert: false
                 )
@@ -319,7 +323,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         
         return try client.storage
             .from("chat-images")
-            .getPublicURL(path: fileName)
+            .getPublicURL(path: path)
             .absoluteString
     }
 }

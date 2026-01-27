@@ -11,7 +11,7 @@
 		698913D82F2884110021F5BD /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698913D72F2884110021F5BD /* ChatMessage.swift */; };
 		698913DA2F28884B0021F5BD /* ChatViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698913D92F28884B0021F5BD /* ChatViewWrapper.swift */; };
 		69CA96002F1F687800298CD7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 69CA95FA2F1F687800298CD7 /* Assets.xcassets */; };
-		69CA960B2F1F6D6400298CD7 /* SwiftWithSupaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CA96092F1F6D6400298CD7 /* SwiftWithSupaApp.swift */; };
+		69CA960B2F1F6D6400298CD7 /* SwiftChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CA96092F1F6D6400298CD7 /* SwiftChatApp.swift */; };
 		69CA960C2F1F6D6400298CD7 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CA96012F1F6D6400298CD7 /* AuthViewModel.swift */; };
 		69CA960D2F1F6D6400298CD7 /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CA96062F1F6D6400298CD7 /* ProfileModel.swift */; };
 		69CA96102F1F6D6400298CD7 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CA96042F1F6D6400298CD7 /* HomeView.swift */; };
@@ -33,7 +33,7 @@
 		69CA96022F1F6D6400298CD7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		69CA96042F1F6D6400298CD7 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		69CA96062F1F6D6400298CD7 /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
-		69CA96092F1F6D6400298CD7 /* SwiftWithSupaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftWithSupaApp.swift; sourceTree = "<group>"; };
+		69CA96092F1F6D6400298CD7 /* SwiftChatApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftChatApp.swift; sourceTree = "<group>"; };
 		69CA962B2F1F72D500298CD7 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		69CA962F2F1F732300298CD7 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		69CA96322F1F741000298CD7 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -100,7 +100,7 @@
 		69CA96222F1F724A00298CD7 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				69CA96092F1F6D6400298CD7 /* SwiftWithSupaApp.swift */,
+				69CA96092F1F6D6400298CD7 /* SwiftChatApp.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -325,7 +325,7 @@
 				698913DA2F28884B0021F5BD /* ChatViewWrapper.swift in Sources */,
 				69CA96332F1F741000298CD7 /* Constants.swift in Sources */,
 				69CA963E2F1F9B9600298CD7 /* ChatViewModel.swift in Sources */,
-				69CA960B2F1F6D6400298CD7 /* SwiftWithSupaApp.swift in Sources */,
+				69CA960B2F1F6D6400298CD7 /* SwiftChatApp.swift in Sources */,
 				69CA960C2F1F6D6400298CD7 /* AuthViewModel.swift in Sources */,
 				69CA96352F1F742000298CD7 /* SupabaseConfig.swift in Sources */,
 				698913D82F2884110021F5BD /* ChatMessage.swift in Sources */,
