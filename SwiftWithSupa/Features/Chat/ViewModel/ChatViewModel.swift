@@ -25,17 +25,21 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     }
     
     func start() async {
+        print("[ChatViewModel] start() called")
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
         
         do {
+            print("[ChatViewModel] Loading or creating chat between \(currentUser.id) and \(otherUser.id)")
             let chat = try await loadOrCreateChat()
             chatId = chat.id
+            print("[ChatViewModel] Got chatId:", chat.id.uuidString)
             
             try await loadMessages(chatId: chat.id)
             subscribeToRealtime(chatId: chat.id)
         } catch {
+            print("[ChatViewModel] Failed to start with error:", error)
             errorMessage = error.localizedDescription
         }
     }
@@ -78,12 +82,18 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     }
     
     private func loadMessages(chatId: UUID) async throws {
+        print("[ChatViewModel] Loading messages for chatId:", chatId.uuidString)
         let response = try await client
             .from("messages")
             .select()
             .eq("chat_id", value: chatId.uuidString)
             .order("created_at", ascending: true)
             .execute()
+        
+        print("[ChatViewModel] Load messages response status:", response.response.statusCode)
+        if let jsonString = String(data: response.data, encoding: .utf8) {
+            print("[ChatViewModel] Load messages payload:", jsonString)
+        }
         
         let decoded = try JSONDecoder().decode([ChatMessage].self, from: response.data)
         messages = decoded
@@ -92,14 +102,17 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     func sendTextMessage(_ text: String) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
+            print("[ChatViewModel] sendTextMessage called with empty/whitespace text. Ignoring.")
             return
         }
         
         if chatId == nil {
+            print("[ChatViewModel] chatId is nil in sendTextMessage. Calling start() to create/load chat.")
             await start()
         }
         
         guard let chatId = chatId else {
+            print("[ChatViewModel] chatId is still nil after start(). Aborting sendTextMessage.")
             return
         }
         
@@ -111,6 +124,8 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         } else {
             messageType = .text
         }
+        
+        print("[ChatViewModel] Sending text message. type=\(messageType) content=\(trimmed)")
         
         let payload = ChatMessage.InsertPayload(
             chat_id: chatId,
@@ -127,27 +142,37 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                 .single()
                 .execute()
             
+            print("[ChatViewModel] sendTextMessage insert status:", response.response.statusCode)
+            if let jsonString = String(data: response.data, encoding: .utf8) {
+                print("[ChatViewModel] sendTextMessage insert payload:", jsonString)
+            }
+            
             let message = try JSONDecoder().decode(ChatMessage.self, from: response.data)
             
             if !messages.contains(where: { $0.id == message.id }) {
                 messages.append(message)
             }
         } catch {
+            print("[ChatViewModel] sendTextMessage failed with error:", error)
             errorMessage = error.localizedDescription
         }
     }
     
     func sendImageMessage(image: UIImage) async {
         if chatId == nil {
+            print("[ChatViewModel] chatId is nil in sendImageMessage. Calling start() to create/load chat.")
             await start()
         }
         
         guard let chatId = chatId else {
+            print("[ChatViewModel] chatId is still nil after start(). Aborting sendImageMessage.")
             return
         }
         
         do {
+            print("[ChatViewModel] Uploading image for chatId:", chatId.uuidString)
             let url = try await uploadImage(image: image)
+            print("[ChatViewModel] Image uploaded. Public URL:", url)
             
             let payload = ChatMessage.InsertPayload(
                 chat_id: chatId,
@@ -163,13 +188,18 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                 .single()
                 .execute()
             
+            print("[ChatViewModel] sendImageMessage insert status:", response.response.statusCode)
+            if let jsonString = String(data: response.data, encoding: .utf8) {
+                print("[ChatViewModel] sendImageMessage insert payload:", jsonString)
+            }
+            
             let message = try JSONDecoder().decode(ChatMessage.self, from: response.data)
             
             if !messages.contains(where: { $0.id == message.id }) {
                 messages.append(message)
             }
         } catch {
-            print("Upload error:", error)
+            print("[ChatViewModel] sendImageMessage failed with error:", error)
             self.errorMessage = error.localizedDescription
         }
     }
