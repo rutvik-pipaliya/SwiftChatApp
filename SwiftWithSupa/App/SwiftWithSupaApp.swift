@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct SwiftWithSupaApp: App {
+struct SwiftChatApp: App {
     @StateObject private var authManager = AuthViewModel()
     
     var body: some Scene {
