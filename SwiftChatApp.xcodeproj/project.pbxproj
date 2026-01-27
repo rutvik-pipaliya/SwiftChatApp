@@ -27,7 +27,7 @@
 /* Begin PBXFileReference section */
 		698913D72F2884110021F5BD /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		698913D92F28884B0021F5BD /* ChatViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewWrapper.swift; sourceTree = "<group>"; };
-		69CA95EC2F1F687300298CD7 /* SwiftWithSupa.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftWithSupa.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		69CA95EC2F1F687300298CD7 /* SwiftChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		69CA95FA2F1F687800298CD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		69CA96012F1F6D6400298CD7 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		69CA96022F1F6D6400298CD7 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
@@ -66,7 +66,7 @@
 		69CA95ED2F1F687300298CD7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				69CA95EC2F1F687300298CD7 /* SwiftWithSupa.app */,
+				69CA95EC2F1F687300298CD7 /* SwiftChatApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -246,9 +246,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		69CA95EB2F1F687300298CD7 /* SwiftWithSupa */ = {
+		69CA95EB2F1F687300298CD7 /* SwiftChatApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 69CA95F72F1F687400298CD7 /* Build configuration list for PBXNativeTarget "SwiftWithSupa" */;
+			buildConfigurationList = 69CA95F72F1F687400298CD7 /* Build configuration list for PBXNativeTarget "SwiftChatApp" */;
 			buildPhases = (
 				69CA95E82F1F687300298CD7 /* Sources */,
 				69CA95E92F1F687300298CD7 /* Frameworks */,
@@ -258,12 +258,12 @@
 			);
 			dependencies = (
 			);
-			name = SwiftWithSupa;
+			name = SwiftChatApp;
 			packageProductDependencies = (
 				698913D52F2882B00021F5BD /* SwiftChat */,
 			);
 			productName = SwiftWithSupa;
-			productReference = 69CA95EC2F1F687300298CD7 /* SwiftWithSupa.app */;
+			productReference = 69CA95EC2F1F687300298CD7 /* SwiftChatApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -282,7 +282,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 69CA95E72F1F687300298CD7 /* Build configuration list for PBXProject "SwiftWithSupa" */;
+			buildConfigurationList = 69CA95E72F1F687300298CD7 /* Build configuration list for PBXProject "SwiftChatApp" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -299,7 +299,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				69CA95EB2F1F687300298CD7 /* SwiftWithSupa */,
+				69CA95EB2F1F687300298CD7 /* SwiftChatApp */,
 			);
 		};
 /* End PBXProject section */
@@ -536,7 +536,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		69CA95E72F1F687300298CD7 /* Build configuration list for PBXProject "SwiftWithSupa" */ = {
+		69CA95E72F1F687300298CD7 /* Build configuration list for PBXProject "SwiftChatApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				69CA95F52F1F687400298CD7 /* Debug */,
@@ -545,7 +545,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		69CA95F72F1F687400298CD7 /* Build configuration list for PBXNativeTarget "SwiftWithSupa" */ = {
+		69CA95F72F1F687400298CD7 /* Build configuration list for PBXNativeTarget "SwiftChatApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				69CA95F82F1F687400298CD7 /* Debug */,
