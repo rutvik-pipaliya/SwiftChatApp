@@ -6,6 +6,10 @@ import SwiftChat
 
 @MainActor
 final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
+    func loadMoreMessages() async {
+        print("loadMoreMessages")
+    }
+    
     
     @Published var messages: [any ChatMessageProtocol] = []
     @Published var isLoading = false
