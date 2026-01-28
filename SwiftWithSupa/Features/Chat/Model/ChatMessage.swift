@@ -33,7 +33,7 @@ struct ChatMessage: Identifiable, Codable, Hashable, ChatMessageProtocol {
     enum CodingKeys: String, CodingKey {
         case id, chat_id, sender_id, content, type, is_read, created_at, updated_at
     }
-
+    
     struct InsertPayload: Encodable {
         let chat_id: UUID
         let sender_id: UUID

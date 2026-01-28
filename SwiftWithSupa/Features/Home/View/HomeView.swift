@@ -8,7 +8,7 @@ struct HomeView: View {
     @StateObject private var homeViewModel = HomeViewModel()
     @State private var otherUsers: [ProfileModel] = []
     @State private var isLoading = false
-
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
@@ -26,7 +26,7 @@ struct HomeView: View {
                     }
                     .frame(width: 60, height: 60)
                     .clipShape(Circle())
-
+                    
                     VStack(alignment: .leading) {
                         Text(currentUser.full_name)
                             .font(.headline)
@@ -35,11 +35,11 @@ struct HomeView: View {
                             .foregroundColor(.secondary)
                     }
                 }
-
+                
                 Text("Other Users")
                     .font(.title3)
                     .bold()
-
+                
                 if isLoading {
                     ProgressView()
                 } else {
@@ -61,7 +61,7 @@ struct HomeView: View {
                                 }
                                 .frame(width: 40, height: 40)
                                 .clipShape(Circle())
-
+                                
                                 VStack(alignment: .leading) {
                                     Text(profile.full_name)
                                     Text(profile.email)
@@ -86,7 +86,7 @@ struct HomeView: View {
             }
         }
     }
-
+    
     private func loadOtherUsers() async {
         isLoading = true
         defer { isLoading = false }

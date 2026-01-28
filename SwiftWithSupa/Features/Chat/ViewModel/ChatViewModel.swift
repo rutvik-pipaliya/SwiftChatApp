@@ -19,6 +19,8 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     
     private var channel: RealtimeChannelV2?
     
+    private var pollingTask: Task<Void, Never>?
+    
     init(currentUser: ProfileModel, otherUser: ProfileModel) {
         self.currentUser = currentUser
         self.otherUser = otherUser
@@ -35,6 +37,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
             
             try await loadMessages(chatId: chat.id)
             subscribeToRealtime(chatId: chat.id)
+            startPolling(chatId: chat.id)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -283,6 +286,24 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         self.channel = channel
     }
     
+    private func startPolling(chatId: UUID) {
+        pollingTask?.cancel()
+        
+        pollingTask = Task { [weak self] in
+            guard let self = self else { return }
+            
+            while !Task.isCancelled {
+                do {
+                    try await self.loadMessages(chatId: chatId)
+                } catch {
+                    print("[ChatViewModel] Polling loadMessages failed with error:", error)
+                }
+                
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+            }
+        }
+    }
+    
     private func storagePath(from publicURLString: String, bucket: String = "avatars") -> String? {
         guard let url = URL(string: publicURLString) else {
             return nil
@@ -298,7 +319,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         let pathComponents = components[(bucketIndex + 1)...]
         return pathComponents.joined(separator: "/")
     }
-
+    
     private func resizedImage(from image: UIImage, scale: CGFloat) -> UIImage? {
         guard scale > 0, scale < 1 else { return image }
         let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
@@ -309,26 +330,26 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
             image.draw(in: CGRect(origin: .zero, size: newSize))
         }
     }
-
+    
     private func compressedJPEGData(from image: UIImage, maxBytes: Int) -> Data? {
         var currentImage: UIImage? = image
         var bestData: Data?
-
+        
         for _ in 0..<4 {
             guard let img = currentImage else { break }
-
+            
             var minQuality: CGFloat = 0.3
             var maxQuality: CGFloat = 0.9
             var bestForThisScale: Data?
-
+            
             for _ in 0..<6 {
                 let q = (minQuality + maxQuality) / 2
                 guard let data = img.jpegData(compressionQuality: q) else { break }
-
+                
                 if bestData == nil || data.count < bestData!.count {
                     bestData = data
                 }
-
+                
                 if data.count > maxBytes {
                     maxQuality = q
                 } else {
@@ -336,19 +357,19 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                     minQuality = q
                 }
             }
-
+            
             if let bestForThisScale {
                 return bestForThisScale
             }
-
+            
             currentImage = resizedImage(from: img, scale: 0.7)
         }
-
+        
         return bestData
     }
     
     private func uploadImage(image: UIImage) async throws -> String {
-
+        
         let maxBytes = 800 * 1024
         guard let data = compressedJPEGData(from: image, maxBytes: maxBytes) else {
             throw NSError(
