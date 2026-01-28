@@ -1,0 +1,83 @@
+# =========================
+# macOS
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# =========================
+# Xcode
+# =========================
+DerivedData/
+*.xcuserdata
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# Xcode build
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Xcode playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# =========================
+# Swift Package Manager
+# =========================
+.build/
+Packages/
+Package.resolved
+.swiftpm/xcode/package.xcworkspace
+
+# =========================
+# CocoaPods
+# =========================
+Pods/
+Podfile.lock
+
+# =========================
+# Carthage
+# =========================
+Carthage/Build/
+
+# =========================
+# Fastlane
+# =========================
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# =========================
+# Logs & Temp
+# =========================
+*.log
+*.tmp
+*.swp
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+*.pem
+*.key
+
+# =========================
+# CI / Misc
+# =========================
+*.hmap
+*.ipa
+*.mobileprovision
+*.cer
+
+# =========================
+# SwiftLint / SwiftFormat
+# =========================
+.swiftlint.yml
+.swiftformat
