@@ -6,6 +6,7 @@ struct ChatViewWrapper: View {
     let otherUser: ProfileModel
     
     @StateObject private var viewModel: ChatViewModel
+    @State private var showErrorAlert = false
     
     init(currentUser: ProfileModel, otherUser: ProfileModel) {
         self.currentUser = currentUser
@@ -24,5 +25,15 @@ struct ChatViewWrapper: View {
         .task {
             await viewModel.start()
         }
+        .onChange(of: viewModel.errorMessage) { newValue in
+            showErrorAlert = newValue != nil
+        }
+        .alert("Error", isPresented: $showErrorAlert, actions: {
+            Button("OK") {
+                viewModel.errorMessage = nil
+            }
+        }, message: {
+            Text(viewModel.errorMessage ?? "")
+        })
     }
 }

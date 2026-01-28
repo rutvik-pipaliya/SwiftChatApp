@@ -25,21 +25,17 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     }
     
     func start() async {
-        print("[ChatViewModel] start() called")
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
         
         do {
-            print("[ChatViewModel] Loading or creating chat between \(currentUser.id) and \(otherUser.id)")
             let chat = try await loadOrCreateChat()
             chatId = chat.id
-            print("[ChatViewModel] Got chatId:", chat.id.uuidString)
             
             try await loadMessages(chatId: chat.id)
             subscribeToRealtime(chatId: chat.id)
         } catch {
-            print("[ChatViewModel] Failed to start with error:", error)
             errorMessage = error.localizedDescription
         }
     }
@@ -82,18 +78,12 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     }
     
     private func loadMessages(chatId: UUID) async throws {
-        print("[ChatViewModel] Loading messages for chatId:", chatId.uuidString)
         let response = try await client
             .from("messages")
             .select()
             .eq("chat_id", value: chatId.uuidString)
             .order("created_at", ascending: true)
             .execute()
-        
-        print("[ChatViewModel] Load messages response status:", response.response.statusCode)
-        if let jsonString = String(data: response.data, encoding: .utf8) {
-            print("[ChatViewModel] Load messages payload:", jsonString)
-        }
         
         let decoded = try JSONDecoder().decode([ChatMessage].self, from: response.data)
         messages = decoded
@@ -102,17 +92,14 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     func sendTextMessage(_ text: String) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            print("[ChatViewModel] sendTextMessage called with empty/whitespace text. Ignoring.")
             return
         }
         
         if chatId == nil {
-            print("[ChatViewModel] chatId is nil in sendTextMessage. Calling start() to create/load chat.")
             await start()
         }
         
         guard let chatId = chatId else {
-            print("[ChatViewModel] chatId is still nil after start(). Aborting sendTextMessage.")
             return
         }
         
@@ -124,8 +111,6 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         } else {
             messageType = .text
         }
-        
-        print("[ChatViewModel] Sending text message. type=\(messageType) content=\(trimmed)")
         
         let payload = ChatMessage.InsertPayload(
             chat_id: chatId,
@@ -142,37 +127,27 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                 .single()
                 .execute()
             
-            print("[ChatViewModel] sendTextMessage insert status:", response.response.statusCode)
-            if let jsonString = String(data: response.data, encoding: .utf8) {
-                print("[ChatViewModel] sendTextMessage insert payload:", jsonString)
-            }
-            
             let message = try JSONDecoder().decode(ChatMessage.self, from: response.data)
             
             if !messages.contains(where: { $0.id == message.id }) {
                 messages.append(message)
             }
         } catch {
-            print("[ChatViewModel] sendTextMessage failed with error:", error)
             errorMessage = error.localizedDescription
         }
     }
     
     func sendImageMessage(image: UIImage) async {
         if chatId == nil {
-            print("[ChatViewModel] chatId is nil in sendImageMessage. Calling start() to create/load chat.")
             await start()
         }
         
         guard let chatId = chatId else {
-            print("[ChatViewModel] chatId is still nil after start(). Aborting sendImageMessage.")
             return
         }
         
         do {
-            print("[ChatViewModel] Uploading image for chatId:", chatId.uuidString)
             let url = try await uploadImage(image: image)
-            print("[ChatViewModel] Image uploaded. Public URL:", url)
             
             let payload = ChatMessage.InsertPayload(
                 chat_id: chatId,
@@ -188,18 +163,12 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                 .single()
                 .execute()
             
-            print("[ChatViewModel] sendImageMessage insert status:", response.response.statusCode)
-            if let jsonString = String(data: response.data, encoding: .utf8) {
-                print("[ChatViewModel] sendImageMessage insert payload:", jsonString)
-            }
-            
             let message = try JSONDecoder().decode(ChatMessage.self, from: response.data)
             
             if !messages.contains(where: { $0.id == message.id }) {
                 messages.append(message)
             }
         } catch {
-            print("[ChatViewModel] sendImageMessage failed with error:", error)
             self.errorMessage = error.localizedDescription
         }
     }
@@ -207,10 +176,10 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     func deleteMessage(_ message: any ChatMessageProtocol) async {
         do {
             if message.type == .image,
-               let path = storagePath(from: message.content) {
+               let path = storagePath(from: message.content, bucket: "avatars") {
                 do {
                     _ = try await client.storage
-                        .from("chat-images")
+                        .from("avatars")
                         .remove(paths: [path])
                 } catch {
                     print("Failed to delete image from storage:", error)
@@ -314,7 +283,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         self.channel = channel
     }
     
-    private func storagePath(from publicURLString: String, bucket: String = "chat-images") -> String? {
+    private func storagePath(from publicURLString: String, bucket: String = "avatars") -> String? {
         guard let url = URL(string: publicURLString) else {
             return nil
         }
@@ -329,21 +298,74 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         let pathComponents = components[(bucketIndex + 1)...]
         return pathComponents.joined(separator: "/")
     }
+
+    private func resizedImage(from image: UIImage, scale: CGFloat) -> UIImage? {
+        guard scale > 0, scale < 1 else { return image }
+        let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = image.scale
+        let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
+        return renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+
+    private func compressedJPEGData(from image: UIImage, maxBytes: Int) -> Data? {
+        var currentImage: UIImage? = image
+        var bestData: Data?
+
+        for _ in 0..<4 {
+            guard let img = currentImage else { break }
+
+            var minQuality: CGFloat = 0.3
+            var maxQuality: CGFloat = 0.9
+            var bestForThisScale: Data?
+
+            for _ in 0..<6 {
+                let q = (minQuality + maxQuality) / 2
+                guard let data = img.jpegData(compressionQuality: q) else { break }
+
+                if bestData == nil || data.count < bestData!.count {
+                    bestData = data
+                }
+
+                if data.count > maxBytes {
+                    maxQuality = q
+                } else {
+                    bestForThisScale = data
+                    minQuality = q
+                }
+            }
+
+            if let bestForThisScale {
+                return bestForThisScale
+            }
+
+            currentImage = resizedImage(from: img, scale: 0.7)
+        }
+
+        return bestData
+    }
     
     private func uploadImage(image: UIImage) async throws -> String {
-        guard let data = image.jpegData(compressionQuality: 0.7) else {
-            throw NSError(domain: "ChatImageUpload", code: 0)
+
+        let maxBytes = 800 * 1024
+        guard let data = compressedJPEGData(from: image, maxBytes: maxBytes) else {
+            throw NSError(
+                domain: "ChatImageUpload",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Image is too large. Maximum allowed size is 800 KB. Please choose a smaller image."]
+            )
         }
         
         let fileName = UUID().uuidString + ".jpg"
-        // Store chat images in the dedicated chat-images bucket
-        let path = fileName
+        let path = "chat-images/\(fileName)"
         
         try await client.storage
-            .from("chat-images")
+            .from("avatars")
             .upload(
-                path: path,
-                file: data,
+                path,
+                data: data,
                 options: FileOptions(
                     cacheControl: "3600",
                     contentType: "image/jpeg",
@@ -352,7 +374,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
             )
         
         return try client.storage
-            .from("chat-images")
+            .from("avatars")
             .getPublicURL(path: path)
             .absoluteString
     }
