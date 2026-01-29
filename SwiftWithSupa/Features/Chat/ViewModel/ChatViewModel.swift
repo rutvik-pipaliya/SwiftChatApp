@@ -6,20 +6,21 @@ import SwiftChat
 
 @MainActor
 final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
-    func loadMoreMessages() async {
-        print("loadMoreMessages")
-    }
-    
-    
     @Published var messages: [any ChatMessageProtocol] = []
     @Published var isLoading = false
+    @Published var isLoadingMore = false
     @Published var errorMessage: String?
     
     private let client = SupabaseConfig.shared.client
+    private let pageSize = 30
     
     private(set) var chatId: UUID?
     private let currentUser: ProfileModel
     private let otherUser: ProfileModel
+    
+    private var oldestLoadedCreatedAt: String?
+    private(set) var hasMoreOlderMessages = true
+    private var newestLoadedCreatedAt: String?
     
     private var channel: RealtimeChannelV2?
     
@@ -28,6 +29,31 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
     init(currentUser: ProfileModel, otherUser: ProfileModel) {
         self.currentUser = currentUser
         self.otherUser = otherUser
+    }
+    
+    func loadMoreMessages() async {
+        guard hasMoreOlderMessages, !isLoadingMore,
+              let cursor = oldestLoadedCreatedAt,
+              let chatId = chatId else { return }
+        isLoadingMore = true
+        defer { isLoadingMore = false }
+        do {
+            let response = try await client
+                .from("messages")
+                .select()
+                .eq("chat_id", value: chatId.uuidString)
+                .lt("created_at", value: cursor)
+                .order("created_at", ascending: false)
+                .limit(pageSize)
+                .execute()
+            let decoded = try JSONDecoder().decode([ChatMessage].self, from: response.data)
+            let olderReversed = decoded.reversed()
+            messages = olderReversed.map { $0 as any ChatMessageProtocol } + messages
+            hasMoreOlderMessages = decoded.count == pageSize
+            oldestLoadedCreatedAt = decoded.last?.created_at
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
     
     func start() async {
@@ -89,11 +115,15 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
             .from("messages")
             .select()
             .eq("chat_id", value: chatId.uuidString)
-            .order("created_at", ascending: true)
+            .order("created_at", ascending: false)
+            .limit(pageSize)
             .execute()
         
         let decoded = try JSONDecoder().decode([ChatMessage].self, from: response.data)
-        messages = decoded
+        messages = decoded.reversed()
+        hasMoreOlderMessages = decoded.count == pageSize
+        oldestLoadedCreatedAt = decoded.last?.created_at
+        newestLoadedCreatedAt = decoded.first?.created_at
     }
     
     func sendTextMessage(_ text: String) async {
@@ -138,6 +168,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
             
             if !messages.contains(where: { $0.id == message.id }) {
                 messages.append(message)
+                newestLoadedCreatedAt = message.created_at
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -174,6 +205,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
             
             if !messages.contains(where: { $0.id == message.id }) {
                 messages.append(message)
+                newestLoadedCreatedAt = message.created_at
             }
         } catch {
             self.errorMessage = error.localizedDescription
@@ -252,6 +284,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                                 self.messages[index] = message
                             } else {
                                 self.messages.append(message)
+                                self.newestLoadedCreatedAt = message.created_at
                             }
                         } catch {
                             self.errorMessage = error.localizedDescription
@@ -269,6 +302,7 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
                                 self.messages[index] = message
                             } else {
                                 self.messages.append(message)
+                                self.newestLoadedCreatedAt = message.created_at
                             }
                         } catch {
                             self.errorMessage = error.localizedDescription
@@ -290,6 +324,26 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
         self.channel = channel
     }
     
+    private func loadNewMessages(chatId: UUID) async throws {
+        guard let after = newestLoadedCreatedAt else { return }
+        let response = try await client
+            .from("messages")
+            .select()
+            .eq("chat_id", value: chatId.uuidString)
+            .gt("created_at", value: after)
+            .order("created_at", ascending: true)
+            .execute()
+        let decoded = try JSONDecoder().decode([ChatMessage].self, from: response.data)
+        for message in decoded {
+            if !messages.contains(where: { $0.id == message.id }) {
+                messages.append(message)
+            }
+        }
+        if let newest = decoded.last?.created_at {
+            newestLoadedCreatedAt = newest
+        }
+    }
+    
     private func startPolling(chatId: UUID) {
         pollingTask?.cancel()
         
@@ -298,9 +352,9 @@ final class ChatViewModel: ObservableObject, ChatViewModelProtocol {
             
             while !Task.isCancelled {
                 do {
-                    try await self.loadMessages(chatId: chatId)
+                    try await self.loadNewMessages(chatId: chatId)
                 } catch {
-                    print("[ChatViewModel] Polling loadMessages failed with error:", error)
+                    print("[ChatViewModel] Polling loadNewMessages failed with error:", error)
                 }
                 
                 try? await Task.sleep(nanoseconds: 3_000_000_000)

@@ -10,6 +10,7 @@
 		698913D62F2882B00021F5BD /* SwiftChat in Frameworks */ = {isa = PBXBuildFile; productRef = 698913D52F2882B00021F5BD /* SwiftChat */; };
 		698913D82F2884110021F5BD /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698913D72F2884110021F5BD /* ChatMessage.swift */; };
 		698913DA2F28884B0021F5BD /* ChatViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698913D92F28884B0021F5BD /* ChatViewWrapper.swift */; };
+		698913DC2F28884C0021F5BD /* PaginatedChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698913DB2F28884C0021F5BD /* PaginatedChatView.swift */; };
 		69CA96002F1F687800298CD7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 69CA95FA2F1F687800298CD7 /* Assets.xcassets */; };
 		69CA960B2F1F6D6400298CD7 /* SwiftChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CA96092F1F6D6400298CD7 /* SwiftChatApp.swift */; };
 		69CA960C2F1F6D6400298CD7 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CA96012F1F6D6400298CD7 /* AuthViewModel.swift */; };
@@ -27,6 +28,7 @@
 /* Begin PBXFileReference section */
 		698913D72F2884110021F5BD /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		698913D92F28884B0021F5BD /* ChatViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewWrapper.swift; sourceTree = "<group>"; };
+		698913DB2F28884C0021F5BD /* PaginatedChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaginatedChatView.swift; sourceTree = "<group>"; };
 		69CA95EC2F1F687300298CD7 /* SwiftChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		69CA95FA2F1F687800298CD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		69CA96012F1F6D6400298CD7 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 			isa = PBXGroup;
 			children = (
 				698913D92F28884B0021F5BD /* ChatViewWrapper.swift */,
+				698913DB2F28884C0021F5BD /* PaginatedChatView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -323,6 +326,7 @@
 				69CA96412F1FA04500298CD7 /* Chat.swift in Sources */,
 				69CA96302F1F732300298CD7 /* HomeViewModel.swift in Sources */,
 				698913DA2F28884B0021F5BD /* ChatViewWrapper.swift in Sources */,
+				698913DC2F28884C0021F5BD /* PaginatedChatView.swift in Sources */,
 				69CA96332F1F741000298CD7 /* Constants.swift in Sources */,
 				69CA963E2F1F9B9600298CD7 /* ChatViewModel.swift in Sources */,
 				69CA960B2F1F6D6400298CD7 /* SwiftChatApp.swift in Sources */,

@@ -15,17 +15,19 @@ struct ChatViewWrapper: View {
     }
     
     var body: some View {
-        ChatView(
+        PaginatedChatView(
             currentUser: currentUser,
             otherUser: otherUser,
-            viewModel: viewModel
+            viewModel: viewModel,
+            showLoadingMore: viewModel.isLoadingMore,
+            hasMoreOlderMessages: viewModel.hasMoreOlderMessages
         )
         .navigationTitle(otherUser.full_name)
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.start()
         }
-        .onChange(of: viewModel.errorMessage) { newValue in
+        .onChange(of: viewModel.errorMessage) { oldValue, newValue in
             showErrorAlert = newValue != nil
         }
         .alert("Error", isPresented: $showErrorAlert, actions: {
