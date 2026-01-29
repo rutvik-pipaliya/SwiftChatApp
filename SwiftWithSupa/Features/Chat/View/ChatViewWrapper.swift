@@ -15,7 +15,7 @@ struct ChatViewWrapper: View {
     }
     
     var body: some View {
-        PaginatedChatView(
+        SwiftChat.ChatView(
             currentUser: currentUser,
             otherUser: otherUser,
             viewModel: viewModel,
@@ -27,7 +27,7 @@ struct ChatViewWrapper: View {
         .task {
             await viewModel.start()
         }
-        .onChange(of: viewModel.errorMessage) { oldValue, newValue in
+        .onChange(of: viewModel.errorMessage) { newValue in
             showErrorAlert = newValue != nil
         }
         .alert("Error", isPresented: $showErrorAlert, actions: {
